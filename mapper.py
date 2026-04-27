@@ -16,7 +16,7 @@ print("message :- ",message);
 
 
 
-# # open THE iamge resize to 300x300 -> convert to RGb image -> convert to greyscale ->
+# # open THE iamge resize to 300x300 -> convert to RGB image -> convert to greyscale ->
 img_rgb = Image.open(master_img).convert("RGB")
 img_rgb = img_rgb.resize((300, 300))
 matrix_rgb = np.array(img_rgb)
@@ -29,15 +29,18 @@ matrix_manual_gray = (0.299 * R + 0.587 * G + 0.114 * B).astype(np.uint8)
 # #
 
 
-# # Generate a random integer of fixed length to choose transformations on matrix_manual_gray matrix
+# # Generate a random integer of fixed length use it for transformations on matrix_manual_gray matrix
 length = 5
 random_number = random.randint(10**(length-1), 10**length-1)
-
 digits = np.array([int(d) for d in str(random_number)])
+
+# spanning 1x5 martix to 300x300
 transformed = np.tile(digits, (90000 // digits.size + 1))[:90000]
 transformed = transformed.reshape(300, 300)
-# matrix multiplication
+
+# matrix tranformation  
 transformed = np.dot(matrix_manual_gray,transformed)
+
 # limiting to max value 255
 transformed = transformed%255
 # #
@@ -66,7 +69,8 @@ final_index = "".join(index_numbers)
 # #
 
 
-# # encoding above string of numbers into encoded image(user inp) and save the new encoded iamge
+# # encoding above string of numbers into encoded image(user input) 
+# # and save the new encoded image using LSB steganography
 before_enc = str(random_number) + str(final_index)
 def encode_fixed(final_index, width=12):
     # Convert to integer
@@ -83,16 +87,7 @@ def encode_fixed(final_index, width=12):
     encoded = encoded.zfill(width)
     return encoded
 
-def decode_fixed(encoded):
-    # Decode back from base36
-    alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    num = 0
-    for char in encoded.lstrip("0"):  # strip leading zeros
-        num = num * 36 + alphabet.index(char)
-    return str(num)
-
 encoded = encode_fixed(before_enc, width=12)
-decoded = decode_fixed(encoded)
 
 message = str(encoded)
 

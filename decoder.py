@@ -13,7 +13,7 @@ encoded_img = input("Enter encoded PNG image name(in current dir): ");
 # #
 
 
-# # open THE iamge resize to 300x300 -> convert to RGb image -> convert to greyscale ->
+# # open THE iamge resize to 300x300 -> convert to RGB image -> convert to greyscale ->
 img_rgb = Image.open(master_img).convert("RGB")
 img_rgb = img_rgb.resize((300, 300))
 matrix_rgb = np.array(img_rgb)
@@ -26,9 +26,10 @@ matrix_manual_gray = (0.299 * R + 0.587 * G + 0.114 * B).astype(np.uint8)
 # #
 
 
-# # decoding the encoded image
+# # decoding the encoded image using LSB steganography
 secret = lsb.reveal(encoded_img)
 # #
+
 
 # # transforming master image based on decoded secret
 def decode_fixed(encoded):
@@ -43,13 +44,21 @@ decoded = int(decode_fixed(secret))
 size = len(str(decoded))
 decoded_str = str(decoded)
 
+# extracting random  nunmber that was generated
 random_number = int(decoded_str[0:5])
 
+
+# performing same transformtion as mapper program
+# spanning 1x5 martix to 300x300
 digits = np.array([int(d) for d in str(random_number)])
 transformed = np.tile(digits, (90000 // digits.size + 1))[:90000]
 transformed = transformed.reshape(300, 300)
+
+
 # matrix tranformation
 transformed = np.dot(matrix_manual_gray,transformed)
+
+# limiting to max value 255
 transformed = transformed%255
 
 # # extracting message from master image based on index given in decoded secret
@@ -78,3 +87,4 @@ ascii_chars = [chr(int(val, 16)) for val in results]
 message = "".join(ascii_chars)
 
 print("Decoded message:", message)
+# # end
